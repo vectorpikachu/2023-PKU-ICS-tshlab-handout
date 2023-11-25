@@ -1334,4 +1334,6 @@ trace27-28也是一样的trace30 kill process group
 
 ## trace29 大杂烩之前做好了应该都是对的
 
-## trace31 是过不去的
+## trace31 是有一个`WCONTINUED`的问题
+
+在`sigchld_handler()`里面中的`options`加入`WCONTINUED`，然后下面的判断中再加入`WIFCONTINUED(status)`，把`job`的`state`设置为`BG`即可。
