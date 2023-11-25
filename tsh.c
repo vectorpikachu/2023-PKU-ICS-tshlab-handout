@@ -507,7 +507,7 @@ sigchld_handler(int sig)
     // 如果处理程序和主程序共享一个全局数据结构，那么就需要在处理程序中屏蔽所有信号
     Sigfillset(&mask_all);
 
-    while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
+    while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0) {
         // WNOHANG | WUNTRACED: 如果没有子进程终止或者停止，那么waitpid就会立即返回0
         // 如果有子进程终止或者停止，那么waitpid就会返回子进程的pid
         Sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
@@ -551,6 +551,10 @@ sigchld_handler(int sig)
             fflush(stdout);
             // trace14 passed
         }
+	else if (WIFCONTINUED(status)) {
+		// 修改state为BG
+		getjobpid(job_list, pid)->state = BG;
+	}
         Sigprocmask(SIG_SETMASK, &prev_all, NULL);
     }
 
